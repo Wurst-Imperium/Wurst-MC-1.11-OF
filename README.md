@@ -1,5 +1,5 @@
-# Wurst MC 1.11
-Wurst Client for Minecraft 1.11 - 1.11.2
+# Wurst MC 1.11 OF
+Wurst Client for Minecraft 1.11 - 1.11.2 + OptiFine
 
 [![Download Wurst](https://cloud.githubusercontent.com/assets/10100202/24546386/48b5857c-160b-11e7-9ec0-443379bfdb72.png)](https://www.wurstclient.net/download/)
 
