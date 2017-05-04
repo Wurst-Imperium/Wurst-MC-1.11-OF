@@ -1,6 +1,6 @@
-From 6edf2de02650a4e78a792147ecf1039a6d473cec Mon Sep 17 00:00:00 2001
+From ff2eae8732b5421b16e0e6c47e7d258f9a6a95a6 Mon Sep 17 00:00:00 2001
 From: Alexander01998 <contact.wurstimperium@gmail.com>
-Date: Wed, 3 May 2017 20:34:26 +0200
+Date: Thu, 4 May 2017 08:10:37 +0200
 Subject: [PATCH] mod
 
 ---
@@ -37,7 +37,7 @@ Subject: [PATCH] mod
  .../client/network/NetworkPlayerInfo.java          |   8 +
  .../client/renderer/BlockFluidRenderer.java        |   8 +
  .../client/renderer/BlockModelRenderer.java        |  14 +-
- net/minecraft/client/renderer/EntityRenderer.java  | 105 ++++++---
+ net/minecraft/client/renderer/EntityRenderer.java  | 107 +++++++---
  net/minecraft/client/renderer/ItemRenderer.java    |  10 +
  net/minecraft/client/renderer/chunk/VisGraph.java  |   8 +
  net/minecraft/client/renderer/entity/Render.java   |  24 +++
@@ -58,7 +58,7 @@ Subject: [PATCH] mod
  net/minecraft/util/ScreenShotHelper.java           |  15 +-
  net/minecraft/util/Timer.java                      |   6 +
  net/minecraft/world/World.java                     |  39 ++--
- 54 files changed, 1330 insertions(+), 638 deletions(-)
+ 54 files changed, 1332 insertions(+), 638 deletions(-)
 
 diff --git a/Start.java b/Start.java
 index ae0025f..9b0eed6 100644
@@ -2645,7 +2645,7 @@ index 80d9f25..c087365 100644
              this.renderQuadsSmooth(worldIn, stateIn, posIn, buffer, list1, renderenv);
              flag = true;
 diff --git a/net/minecraft/client/renderer/EntityRenderer.java b/net/minecraft/client/renderer/EntityRenderer.java
-index b34a3af..081b0d9 100644
+index b34a3af..0a8bc50 100644
 --- a/net/minecraft/client/renderer/EntityRenderer.java
 +++ b/net/minecraft/client/renderer/EntityRenderer.java
 @@ -1,8 +1,5 @@
@@ -2798,17 +2798,19 @@ index b34a3af..081b0d9 100644
          GlStateManager.enableAlpha();
          GlStateManager.alphaFunc(516, 0.1F);
          this.mc.mcProfiler.startSection("center");
-@@ -1888,6 +1904,9 @@ public class EntityRenderer implements IResourceManagerReloadListener
+@@ -1894,6 +1910,11 @@ public class EntityRenderer implements IResourceManagerReloadListener
+             {
+                 ShadersRender.renderHand1(this, partialTicks, pass);
+                 Shaders.renderCompositeFinal();
++				
++				// TODO: Client
++				GlStateManager.disableLighting();
++				GlStateManager.disableBlend();
++				WurstClient.INSTANCE.events.fire(new RenderEvent(partialTicks));
+             }
  
-         this.mc.mcProfiler.endStartSection("hand");
- 
-+		// TODO: Client
-+		WurstClient.INSTANCE.events.fire(new RenderEvent(partialTicks));
-+
-         if (this.renderHand && !Shaders.isShadowPass)
-         {
-             if (flag)
-@@ -2321,8 +2340,12 @@ public class EntityRenderer implements IResourceManagerReloadListener
+             GlStateManager.clear(256);
+@@ -2321,8 +2342,12 @@ public class EntityRenderer implements IResourceManagerReloadListener
          this.fogColorBlue *= f13;
          double d1 = (entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * (double)partialTicks) * world.provider.getVoidFogYFactor();
  
@@ -2822,7 +2824,7 @@ index b34a3af..081b0d9 100644
              int i = ((EntityLivingBase)entity).getActivePotionEffect(MobEffects.BLINDNESS).getDuration();
  
              if (i < 20)
-@@ -2420,9 +2443,13 @@ public class EntityRenderer implements IResourceManagerReloadListener
+@@ -2420,9 +2445,13 @@ public class EntityRenderer implements IResourceManagerReloadListener
          if (f >= 0.0F)
          {
              GlStateManager.setFogDensity(f);
@@ -2838,7 +2840,7 @@ index b34a3af..081b0d9 100644
              float f2 = 5.0F;
              int i = ((EntityLivingBase)entity).getActivePotionEffect(MobEffects.BLINDNESS).getDuration();
  
-@@ -2482,8 +2509,12 @@ public class EntityRenderer implements IResourceManagerReloadListener
+@@ -2482,8 +2511,12 @@ public class EntityRenderer implements IResourceManagerReloadListener
  
              if (entity instanceof EntityLivingBase)
              {
@@ -2852,7 +2854,7 @@ index b34a3af..081b0d9 100644
                      GlStateManager.setFogDensity(0.01F);
                  }
                  else
-@@ -2503,17 +2534,23 @@ public class EntityRenderer implements IResourceManagerReloadListener
+@@ -2503,17 +2536,23 @@ public class EntityRenderer implements IResourceManagerReloadListener
          }
          else if (iblockstate.getMaterial() == Material.LAVA)
          {
