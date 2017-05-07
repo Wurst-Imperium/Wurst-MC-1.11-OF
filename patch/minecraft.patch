@@ -1,6 +1,6 @@
-From 84eb66cb499203f1e5d2a0e95fa166b8d8cbea31 Mon Sep 17 00:00:00 2001
+From d99a82aaabe0daa0b2dacf20f752c2641517bac9 Mon Sep 17 00:00:00 2001
 From: Alexander01998 <contact.wurstimperium@gmail.com>
-Date: Sat, 6 May 2017 18:35:17 +0200
+Date: Sun, 7 May 2017 17:53:15 +0200
 Subject: [PATCH] mod
 
 ---
@@ -45,6 +45,7 @@ Subject: [PATCH] mod
  .../client/renderer/entity/RenderManager.java      |   6 +-
  .../client/renderer/texture/TextureUtil.java       |   2 +-
  net/minecraft/client/resources/SkinManager.java    |  25 ++-
+ net/minecraft/client/settings/GameSettings.java    |   2 +-
  net/minecraft/client/settings/KeyBinding.java      |   2 +-
  net/minecraft/crash/CrashReport.java               |  29 ++-
  net/minecraft/entity/Entity.java                   | 235 +++++++++++----------
@@ -58,7 +59,7 @@ Subject: [PATCH] mod
  net/minecraft/util/ScreenShotHelper.java           |  15 +-
  net/minecraft/util/Timer.java                      |   6 +
  net/minecraft/world/World.java                     |  39 ++--
- 54 files changed, 1336 insertions(+), 638 deletions(-)
+ 55 files changed, 1337 insertions(+), 639 deletions(-)
 
 diff --git a/Start.java b/Start.java
 index ae0025f..9b0eed6 100644
@@ -3147,6 +3148,19 @@ index 5826984..2a01cd2 100644
                  Minecraft.getMinecraft().addScheduledTask(new Runnable()
                  {
                      public void run()
+diff --git a/net/minecraft/client/settings/GameSettings.java b/net/minecraft/client/settings/GameSettings.java
+index 43f3cbc..d7c4894 100644
+--- a/net/minecraft/client/settings/GameSettings.java
++++ b/net/minecraft/client/settings/GameSettings.java
+@@ -295,7 +295,7 @@ public class GameSettings
+         this.renderDistanceChunks = mcIn.isJava64bit() ? 12 : 8;
+         this.optionsFileOF = new File(optionsFileIn, "optionsof.txt");
+         this.limitFramerate = (int)GameSettings.Options.FRAMERATE_LIMIT.getValueMax();
+-        this.ofKeyBindZoom = new KeyBinding("of.key.zoom", 46, "key.categories.misc");
++        this.ofKeyBindZoom = new KeyBinding("of.key.zoom", 0, "key.categories.misc");
+         this.keyBindings = (KeyBinding[])((KeyBinding[])ArrayUtils.add(this.keyBindings, this.ofKeyBindZoom));
+         GameSettings.Options.RENDER_DISTANCE.setValueMax(32.0F);
+         this.renderDistanceChunks = 8;
 diff --git a/net/minecraft/client/settings/KeyBinding.java b/net/minecraft/client/settings/KeyBinding.java
 index d935c1d..8c9f231 100644
 --- a/net/minecraft/client/settings/KeyBinding.java
