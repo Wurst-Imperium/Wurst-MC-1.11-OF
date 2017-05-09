@@ -1,6 +1,6 @@
-From 984991affa5e99b63defe5198e7f8f8e1252b6d7 Mon Sep 17 00:00:00 2001
+From 9e4b33016d10c22adad444d58ba89882c73f3965 Mon Sep 17 00:00:00 2001
 From: Alexander01998 <contact.wurstimperium@gmail.com>
-Date: Tue, 9 May 2017 17:16:26 +0200
+Date: Tue, 9 May 2017 19:03:21 +0200
 Subject: [PATCH] mod
 
 ---
@@ -1933,7 +1933,7 @@ index 5dced78..6debf4d 100644
              {
                  this.mc.displayGuiScreen(this.parentScreen);
 diff --git a/net/minecraft/client/gui/inventory/GuiChest.java b/net/minecraft/client/gui/inventory/GuiChest.java
-index b5448d5..3ae5ff9 100644
+index b5448d5..58edf91 100644
 --- a/net/minecraft/client/gui/inventory/GuiChest.java
 +++ b/net/minecraft/client/gui/inventory/GuiChest.java
 @@ -1,10 +1,15 @@
@@ -1948,7 +1948,7 @@ index b5448d5..3ae5ff9 100644
 +import net.minecraft.inventory.Slot;
  import net.minecraft.util.ResourceLocation;
 +import net.wurstclient.WurstClient;
-+import net.wurstclient.features.special_features.YesCheatSpf.BypassLevel;
++import net.wurstclient.features.special_features.YesCheatSpf.Profile;
  
  public class GuiChest extends GuiContainer
  {
@@ -1988,8 +1988,8 @@ index b5448d5..3ae5ff9 100644
 +							if(slot.getStack() == null)
 +								continue;
 +							if(WurstClient.INSTANCE.special.yesCheatSpf
-+								.getBypassLevel()
-+								.ordinal() >= BypassLevel.ANTICHEAT.ordinal())
++								.getProfile()
++								.ordinal() >= Profile.ANTICHEAT.ordinal())
 +								Thread.sleep(250);
 +							handleMouseClick(slot, slot.slotNumber, 0,
 +								ClickType.QUICK_MOVE);
@@ -2016,8 +2016,8 @@ index b5448d5..3ae5ff9 100644
 +							if(slot.getStack() == null)
 +								continue;
 +							if(WurstClient.INSTANCE.special.yesCheatSpf
-+								.getBypassLevel()
-+								.ordinal() >= BypassLevel.ANTICHEAT.ordinal())
++								.getProfile()
++								.ordinal() >= Profile.ANTICHEAT.ordinal())
 +								Thread.sleep(250);
 +							handleMouseClick(slot, slot.slotNumber, 0,
 +								ClickType.QUICK_MOVE);
