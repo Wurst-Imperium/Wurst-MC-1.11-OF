@@ -1,6 +1,6 @@
-From 323de868b0a7d952b008eeadcfb8fc6d878641a2 Mon Sep 17 00:00:00 2001
+From f9da55e8cef79e8e0f8ef1f00e712f55e3e4b612 Mon Sep 17 00:00:00 2001
 From: Alexander01998 <contact.wurstimperium@gmail.com>
-Date: Tue, 9 May 2017 09:20:14 +0200
+Date: Tue, 9 May 2017 09:50:31 +0200
 Subject: [PATCH] mod
 
 ---
@@ -33,11 +33,11 @@ Subject: [PATCH] mod
  .../client/multiplayer/GuiConnecting.java          |  14 +-
  .../client/multiplayer/PlayerControllerMP.java     |  34 +--
  net/minecraft/client/multiplayer/ServerList.java   |   6 +
- net/minecraft/client/multiplayer/WorldClient.java  |  10 +-
+ net/minecraft/client/multiplayer/WorldClient.java  |  11 +-
  .../client/network/NetHandlerPlayClient.java       | 191 ++++-------------
  .../client/network/NetworkPlayerInfo.java          |   8 +
  .../client/renderer/BlockFluidRenderer.java        |   8 +
- .../client/renderer/BlockModelRenderer.java        |  23 +-
+ .../client/renderer/BlockModelRenderer.java        |  25 ++-
  net/minecraft/client/renderer/EntityRenderer.java  | 111 +++++++---
  net/minecraft/client/renderer/ItemRenderer.java    |  10 +
  net/minecraft/client/renderer/chunk/VisGraph.java  |   8 +
@@ -60,7 +60,7 @@ Subject: [PATCH] mod
  net/minecraft/util/ScreenShotHelper.java           |  15 +-
  net/minecraft/util/Timer.java                      |   6 +
  net/minecraft/world/World.java                     |  39 ++--
- 56 files changed, 1345 insertions(+), 633 deletions(-)
+ 56 files changed, 1348 insertions(+), 633 deletions(-)
 
 diff --git a/Start.java b/Start.java
 index ae0025f..9b0eed6 100644
@@ -2265,7 +2265,7 @@ index 4aa6328..0ece5e8 100644
       * Loads a list of servers from servers.dat, by running ServerData.getServerDataFromNBTCompound on each NBT compound
       * found in the "servers" tag list.
 diff --git a/net/minecraft/client/multiplayer/WorldClient.java b/net/minecraft/client/multiplayer/WorldClient.java
-index 5f10479..6c7b512 100644
+index 5f10479..5999828 100644
 --- a/net/minecraft/client/multiplayer/WorldClient.java
 +++ b/net/minecraft/client/multiplayer/WorldClient.java
 @@ -1,9 +1,12 @@
@@ -2290,12 +2290,13 @@ index 5f10479..6c7b512 100644
  
  public class WorldClient extends World
  {
-@@ -626,6 +630,10 @@ public class WorldClient extends World
+@@ -626,6 +630,11 @@ public class WorldClient extends World
              i = DynamicLights.getCombinedLight(pos, i);
          }
  		
 +		// TODO: Client
-+		if(WurstClient.INSTANCE.mods.xRayMod.isActive())
++		if(WurstClient.INSTANCE.mods.fullbrightMod.useShaderMode()
++			|| WurstClient.INSTANCE.mods.xRayMod.isActive())
 +			return 15728640;
 +		
          return i;
@@ -2615,7 +2616,7 @@ index 7018471..54452a7 100644
              TextureAtlasSprite[] atextureatlassprite = flag ? this.atlasSpritesLava : this.atlasSpritesWater;
              RenderEnv renderenv = worldRendererIn.getRenderEnv(blockAccess, blockStateIn, blockPosIn);
 diff --git a/net/minecraft/client/renderer/BlockModelRenderer.java b/net/minecraft/client/renderer/BlockModelRenderer.java
-index 80d9f25..db21cad 100644
+index 80d9f25..61a76a0 100644
 --- a/net/minecraft/client/renderer/BlockModelRenderer.java
 +++ b/net/minecraft/client/renderer/BlockModelRenderer.java
 @@ -2,7 +2,9 @@ package net.minecraft.client.renderer;
@@ -2662,12 +2663,14 @@ index 80d9f25..db21cad 100644
              list1 = BlockModelCustomizer.getRenderQuads(list1, worldIn, stateIn, posIn, (EnumFacing)null, rand, renderenv);
              this.renderQuadsSmooth(worldIn, stateIn, posIn, buffer, list1, renderenv);
              flag = true;
-@@ -704,6 +716,15 @@ public class BlockModelRenderer
+@@ -704,6 +716,17 @@ public class BlockModelRenderer
                  br3 = br4;
              }
              
 +			// TODO: Client
-+			if(WurstClient.INSTANCE.mods.xRayMod.isActive() && br4 < 15728640)
++			if((WurstClient.INSTANCE.mods.fullbrightMod.useShaderMode()
++				|| WurstClient.INSTANCE.mods.xRayMod.isActive())
++				&& br4 < 15728640)
 +			{
 +				br1 = 15728640;
 +				br2 = 15728640;
