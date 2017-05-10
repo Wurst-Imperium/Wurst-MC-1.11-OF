@@ -1,6 +1,6 @@
-From 9e4b33016d10c22adad444d58ba89882c73f3965 Mon Sep 17 00:00:00 2001
+From da2a7ad90e55a10dc62a9c20437933781c4ad739 Mon Sep 17 00:00:00 2001
 From: Alexander01998 <contact.wurstimperium@gmail.com>
-Date: Tue, 9 May 2017 19:03:21 +0200
+Date: Wed, 10 May 2017 12:27:00 +0200
 Subject: [PATCH] mod
 
 ---
@@ -60,7 +60,8 @@ Subject: [PATCH] mod
  net/minecraft/util/ScreenShotHelper.java           |  15 +-
  net/minecraft/util/Timer.java                      |   6 +
  net/minecraft/world/World.java                     |  39 ++--
- 56 files changed, 1348 insertions(+), 633 deletions(-)
+ shadersmod/client/Shaders.java                     |  44 ++--
+ 57 files changed, 1360 insertions(+), 665 deletions(-)
 
 diff --git a/Start.java b/Start.java
 index ae0025f..9b0eed6 100644
@@ -4272,6 +4273,83 @@ index e142f54..9767cc5 100644
          return this.prevRainingStrength + (this.rainingStrength - this.prevRainingStrength) * delta;
      }
  
+diff --git a/shadersmod/client/Shaders.java b/shadersmod/client/Shaders.java
+index 48d492f..ef2c27b 100644
+--- a/shadersmod/client/Shaders.java
++++ b/shadersmod/client/Shaders.java
+@@ -1,45 +1,16 @@
+ package shadersmod.client;
+ 
+-import java.io.BufferedReader;
+-import java.io.File;
+-import java.io.FileInputStream;
+-import java.io.FileOutputStream;
+-import java.io.FileReader;
+-import java.io.FileWriter;
+-import java.io.IOException;
+-import java.io.InputStream;
+-import java.io.InputStreamReader;
+-import java.io.OutputStream;
+-import java.io.Reader;
+-import java.io.Writer;
++import java.io.*;
+ import java.nio.ByteBuffer;
+ import java.nio.FloatBuffer;
+ import java.nio.IntBuffer;
+-import java.util.ArrayList;
+-import java.util.Arrays;
+-import java.util.HashMap;
+-import java.util.HashSet;
+-import java.util.IdentityHashMap;
+-import java.util.List;
+-import java.util.Map;
+-import java.util.Properties;
+-import java.util.Set;
++import java.util.*;
+ import java.util.regex.Matcher;
+ import java.util.regex.Pattern;
+ 
+ import org.apache.commons.io.IOUtils;
+ import org.lwjgl.BufferUtils;
+-import org.lwjgl.opengl.ARBFragmentShader;
+-import org.lwjgl.opengl.ARBShaderObjects;
+-import org.lwjgl.opengl.ARBVertexShader;
+-import org.lwjgl.opengl.ContextCapabilities;
+-import org.lwjgl.opengl.EXTFramebufferObject;
+-import org.lwjgl.opengl.GL11;
+-import org.lwjgl.opengl.GL12;
+-import org.lwjgl.opengl.GL14;
+-import org.lwjgl.opengl.GL20;
+-import org.lwjgl.opengl.GL30;
+-import org.lwjgl.opengl.GLContext;
++import org.lwjgl.opengl.*;
+ import org.lwjgl.util.glu.GLU;
+ 
+ import net.minecraft.block.Block;
+@@ -78,6 +49,7 @@ import net.minecraft.util.ResourceLocation;
+ import net.minecraft.util.math.Vec3d;
+ import net.minecraft.util.text.TextComponentString;
+ import net.minecraft.world.World;
++import net.wurstclient.WurstClient;
+ import shadersmod.common.SMCLog;
+ 
+ public class Shaders
+@@ -2929,7 +2901,15 @@ public class Shaders
+                 setProgramUniform1i("fogMode", fogEnabled ? fogMode : 0);
+                 setProgramUniform3f("fogColor", fogColorR, fogColorG, fogColorB);
+                 setProgramUniform3f("skyColor", skyColorR, skyColorG, skyColorB);
++                
++				// TODO: Client
++				if(WurstClient.INSTANCE.mods.fullbrightMod.useShaderMode()
++					|| WurstClient.INSTANCE.mods.xRayMod.isActive())
++					setProgramUniform1i("worldTime", 6000);
++				else
++					
+ 					setProgramUniform1i("worldTime", (int)(worldTime % 24000L));
++                
+                 setProgramUniform1i("worldDay", (int)(worldTime / 24000L));
+                 setProgramUniform1i("moonPhase", moonPhase);
+                 setProgramUniform1i("frameCounter", frameCounter);
 -- 
 2.0.0
 
