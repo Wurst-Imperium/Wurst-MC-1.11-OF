@@ -1,6 +1,6 @@
-From da2a7ad90e55a10dc62a9c20437933781c4ad739 Mon Sep 17 00:00:00 2001
+From 915a19640f96b4d8645002b175cf0d5f61812793 Mon Sep 17 00:00:00 2001
 From: Alexander01998 <contact.wurstimperium@gmail.com>
-Date: Wed, 10 May 2017 12:27:00 +0200
+Date: Tue, 16 May 2017 13:41:29 +0200
 Subject: [PATCH] mod
 
 ---
@@ -11,7 +11,7 @@ Subject: [PATCH] mod
  net/minecraft/block/BlockSlab.java                 |   6 +-
  net/minecraft/block/BlockSoulSand.java             |   6 +
  net/minecraft/client/Minecraft.java                | 202 +++++++++---------
- net/minecraft/client/entity/EntityPlayerSP.java    | 106 +++++++---
+ net/minecraft/client/entity/EntityPlayerSP.java    | 105 ++++++---
  net/minecraft/client/gui/FontRenderer.java         |   2 +-
  net/minecraft/client/gui/GuiButton.java            |  19 +-
  net/minecraft/client/gui/GuiDisconnected.java      |  81 +++++++
@@ -61,7 +61,7 @@ Subject: [PATCH] mod
  net/minecraft/util/Timer.java                      |   6 +
  net/minecraft/world/World.java                     |  39 ++--
  shadersmod/client/Shaders.java                     |  44 ++--
- 57 files changed, 1360 insertions(+), 665 deletions(-)
+ 57 files changed, 1359 insertions(+), 665 deletions(-)
 
 diff --git a/Start.java b/Start.java
 index ae0025f..9b0eed6 100644
@@ -703,7 +703,7 @@ index 20bd020..5321772 100644
                  {
                      return;
 diff --git a/net/minecraft/client/entity/EntityPlayerSP.java b/net/minecraft/client/entity/EntityPlayerSP.java
-index 0728387..2831df6 100644
+index 0728387..f93ff17 100644
 --- a/net/minecraft/client/entity/EntityPlayerSP.java
 +++ b/net/minecraft/client/entity/EntityPlayerSP.java
 @@ -1,7 +1,9 @@
@@ -892,15 +892,14 @@ index 0728387..2831df6 100644
              this.movementInput.moveStrafe *= 0.2F;
              this.movementInput.moveForward *= 0.2F;
              this.sprintToggleTimer = 0;
-@@ -1146,7 +1189,10 @@ public class EntityPlayerSP extends AbstractClientPlayer
+@@ -1146,7 +1189,9 @@ public class EntityPlayerSP extends AbstractClientPlayer
  
      public boolean isAutoJumpEnabled()
      {
 -        return this.autoJumpEnabled;
 +		// TODO: Client
 +		return this.autoJumpEnabled
-+			&& !WurstClient.INSTANCE.mods.stepMod.isActive()
-+			&& !WurstClient.INSTANCE.commands.goToCmd.isActive();
++			&& !WurstClient.INSTANCE.mods.stepMod.isAutoJumpAllowed();
      }
  
      protected void updateAutoJump(float p_189810_1_, float p_189810_2_)
