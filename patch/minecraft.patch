@@ -1,6 +1,6 @@
-From 040d8e49c137f6741781cf4c94b16d21af8425e3 Mon Sep 17 00:00:00 2001
+From 1b44ebb3adf28e60515c04e17ddd56298e0f8591 Mon Sep 17 00:00:00 2001
 From: Alexander01998 <contact.wurstimperium@gmail.com>
-Date: Thu, 18 May 2017 14:58:48 +0200
+Date: Thu, 18 May 2017 19:39:23 +0200
 Subject: [PATCH] mod
 
 ---
@@ -1119,7 +1119,7 @@ index 0d62806..d28e917 100644
      }
  }
 diff --git a/net/minecraft/client/gui/GuiIngame.java b/net/minecraft/client/gui/GuiIngame.java
-index 642abb0..8413ead 100644
+index 642abb0..74f9a66 100644
 --- a/net/minecraft/client/gui/GuiIngame.java
 +++ b/net/minecraft/client/gui/GuiIngame.java
 @@ -55,6 +55,8 @@ import net.minecraft.util.math.RayTraceResult;
@@ -1137,7 +1137,7 @@ index 642abb0..8413ead 100644
          
 +		// TODO: Client
 +		if(!this.mc.gameSettings.showDebugInfo)
-+			UIRenderer.renderUI();
++			UIRenderer.renderUI(partialTicks);
 +
          GlStateManager.enableBlend();
          GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
