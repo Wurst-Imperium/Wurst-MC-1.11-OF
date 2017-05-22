@@ -1,6 +1,6 @@
-From 2fdd54cd4eeff1b2801199f8635c161bf353a45c Mon Sep 17 00:00:00 2001
+From 4499b8f9b155e2f57c2da0e2bcdcefbccfe0a553 Mon Sep 17 00:00:00 2001
 From: Alexander01998 <contact.wurstimperium@gmail.com>
-Date: Fri, 19 May 2017 16:04:55 +0200
+Date: Mon, 22 May 2017 20:34:35 +0200
 Subject: [PATCH] mod
 
 ---
@@ -49,7 +49,7 @@ Subject: [PATCH] mod
  net/minecraft/client/settings/GameSettings.java    |   2 +-
  net/minecraft/client/settings/KeyBinding.java      |   2 +-
  net/minecraft/crash/CrashReport.java               |  29 ++-
- net/minecraft/entity/Entity.java                   | 235 +++++++++++----------
+ net/minecraft/entity/Entity.java                   | 236 +++++++++++----------
  net/minecraft/entity/EntityLivingBase.java         |  39 ++--
  net/minecraft/entity/player/EntityPlayer.java      |  40 ++--
  net/minecraft/item/ItemSword.java                  |   2 +-
@@ -61,7 +61,7 @@ Subject: [PATCH] mod
  net/minecraft/util/Timer.java                      |   6 +
  net/minecraft/world/World.java                     |  39 ++--
  shadersmod/client/Shaders.java                     |  44 ++--
- 57 files changed, 1351 insertions(+), 665 deletions(-)
+ 57 files changed, 1352 insertions(+), 665 deletions(-)
 
 diff --git a/Start.java b/Start.java
 index ae0025f..9b0eed6 100644
@@ -3276,7 +3276,7 @@ index 7f9aa86..17b41b5 100644
      }
  
 diff --git a/net/minecraft/entity/Entity.java b/net/minecraft/entity/Entity.java
-index 6fabb5c..5ba4b40 100644
+index 6fabb5c..bef9718 100644
 --- a/net/minecraft/entity/Entity.java
 +++ b/net/minecraft/entity/Entity.java
 @@ -1,8 +1,5 @@
@@ -3333,17 +3333,18 @@ index 6fabb5c..5ba4b40 100644
  import net.minecraft.util.datafix.DataFixer;
  import net.minecraft.util.datafix.FixTypes;
  import net.minecraft.util.datafix.IDataFixer;
-@@ -79,8 +75,7 @@ import net.minecraft.world.Explosion;
+@@ -79,8 +75,8 @@ import net.minecraft.world.Explosion;
  import net.minecraft.world.Teleporter;
  import net.minecraft.world.World;
  import net.minecraft.world.WorldServer;
 -import org.apache.logging.log4j.LogManager;
 -import org.apache.logging.log4j.Logger;
 +import net.wurstclient.WurstClient;
++import net.wurstclient.compatibility.WMinecraft;
  
  public abstract class Entity implements ICommandSender
  {
-@@ -134,7 +129,7 @@ public abstract class Entity implements ICommandSender
+@@ -134,7 +130,7 @@ public abstract class Entity implements ICommandSender
      public float prevRotationPitch;
  
      /** Axis aligned bounding box. */
@@ -3352,7 +3353,7 @@ index 6fabb5c..5ba4b40 100644
      public boolean onGround;
  
      /**
-@@ -152,7 +147,7 @@ public abstract class Entity implements ICommandSender
+@@ -152,7 +148,7 @@ public abstract class Entity implements ICommandSender
       */
      public boolean isCollided;
      public boolean velocityChanged;
@@ -3361,7 +3362,7 @@ index 6fabb5c..5ba4b40 100644
      private boolean isOutsideBorder;
  
      /**
-@@ -710,16 +705,29 @@ public abstract class Entity implements ICommandSender
+@@ -710,16 +706,29 @@ public abstract class Entity implements ICommandSender
      /**
       * Tries to move the entity towards the specified location.
       */
@@ -3395,7 +3396,7 @@ index 6fabb5c..5ba4b40 100644
              {
                  long i = this.world.getTotalWorldTime();
  
-@@ -729,43 +737,43 @@ public abstract class Entity implements ICommandSender
+@@ -729,43 +738,43 @@ public abstract class Entity implements ICommandSender
                      this.field_191506_aJ = i;
                  }
  
@@ -3451,7 +3452,7 @@ index 6fabb5c..5ba4b40 100644
                      {
                          return;
                      }
-@@ -780,143 +788,149 @@ public abstract class Entity implements ICommandSender
+@@ -780,143 +789,149 @@ public abstract class Entity implements ICommandSender
              if (this.isInWeb)
              {
                  this.isInWeb = false;
@@ -3652,7 +3653,7 @@ index 6fabb5c..5ba4b40 100644
                  int j1 = 0;
  
                  for (int k1 = list.size(); j1 < k1; ++j1)
-@@ -944,7 +958,7 @@ public abstract class Entity implements ICommandSender
+@@ -944,7 +959,7 @@ public abstract class Entity implements ICommandSender
  
                  axisalignedbb2 = axisalignedbb2.offset(0.0D, 0.0D, d19);
                  AxisAlignedBB axisalignedbb4 = this.getEntityBoundingBox();
@@ -3661,7 +3662,7 @@ index 6fabb5c..5ba4b40 100644
                  int l2 = 0;
  
                  for (int i3 = list.size(); l2 < i3; ++l2)
-@@ -976,16 +990,16 @@ public abstract class Entity implements ICommandSender
+@@ -976,16 +991,16 @@ public abstract class Entity implements ICommandSender
  
                  if (d23 > d9)
                  {
@@ -3684,7 +3685,7 @@ index 6fabb5c..5ba4b40 100644
                      this.setEntityBoundingBox(axisalignedbb4);
                  }
  
-@@ -993,16 +1007,16 @@ public abstract class Entity implements ICommandSender
+@@ -993,16 +1008,16 @@ public abstract class Entity implements ICommandSender
  
                  for (int k4 = list.size(); j4 < k4; ++j4)
                  {
@@ -3707,7 +3708,7 @@ index 6fabb5c..5ba4b40 100644
                      this.setEntityBoundingBox(axisalignedbb1);
                  }
              }
-@@ -1010,8 +1024,8 @@ public abstract class Entity implements ICommandSender
+@@ -1010,8 +1025,8 @@ public abstract class Entity implements ICommandSender
              this.world.theProfiler.endSection();
              this.world.theProfiler.startSection("rest");
              this.resetPositionToBB();
@@ -3718,7 +3719,7 @@ index 6fabb5c..5ba4b40 100644
              this.onGround = this.isCollidedVertically && d3 < 0.0D;
              this.isCollided = this.isCollidedHorizontally || this.isCollidedVertically;
              int j6 = MathHelper.floor(this.posX);
-@@ -1033,21 +1047,21 @@ public abstract class Entity implements ICommandSender
+@@ -1033,21 +1048,21 @@ public abstract class Entity implements ICommandSender
                  }
              }
  
@@ -3744,7 +3745,7 @@ index 6fabb5c..5ba4b40 100644
              {
                  block.onLanded(this.world, this);
              }
-@@ -2460,9 +2474,14 @@ public abstract class Entity implements ICommandSender
+@@ -2460,9 +2475,14 @@ public abstract class Entity implements ICommandSender
       */
      public void setVelocity(double x, double y, double z)
      {
@@ -3753,9 +3754,9 @@ index 6fabb5c..5ba4b40 100644
 -        this.motionZ = z;
 +		// TODO: Client
 +		float strength = 1F;
-+		if(WurstClient.INSTANCE.mods.antiKnockbackMod.isActive())
-+			strength = 1F - WurstClient.INSTANCE.mods.antiKnockbackMod.strength
-+				.getValueF();
++		if(this == WMinecraft.getPlayer())
++			strength = WurstClient.INSTANCE.mods.antiKnockbackMod
++				.getKnockbackModifier();
 +		this.motionX = x * strength;
 +		this.motionY = y * strength;
 +		this.motionZ = z * strength;
