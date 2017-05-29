@@ -1,6 +1,6 @@
-From af8de7b80a6ea33569b518145d1ede4fd940d8c3 Mon Sep 17 00:00:00 2001
+From d79a33ab8c13205a01bb94866bf43d21cbecaa06 Mon Sep 17 00:00:00 2001
 From: Alexander01998 <contact.wurstimperium@gmail.com>
-Date: Tue, 23 May 2017 08:46:48 +0200
+Date: Mon, 29 May 2017 12:57:25 +0200
 Subject: [PATCH] mod
 
 ---
@@ -58,10 +58,10 @@ Subject: [PATCH] mod
  net/minecraft/realms/Realms.java                   |  12 +-
  net/minecraft/tileentity/TileEntitySign.java       |   2 +-
  net/minecraft/util/ScreenShotHelper.java           |  15 +-
- net/minecraft/util/Timer.java                      |   6 +
+ net/minecraft/util/Timer.java                      |   4 +
  net/minecraft/world/World.java                     |  39 ++--
  shadersmod/client/Shaders.java                     |  44 ++--
- 57 files changed, 1352 insertions(+), 665 deletions(-)
+ 57 files changed, 1350 insertions(+), 665 deletions(-)
 
 diff --git a/Start.java b/Start.java
 index ae0025f..9b0eed6 100644
@@ -4154,25 +4154,23 @@ index b45fbc1..b79520e 100644
              itextcomponent.getStyle().setUnderlined(Boolean.valueOf(true));
  
 diff --git a/net/minecraft/util/Timer.java b/net/minecraft/util/Timer.java
-index f224815..03c38d3 100644
+index f224815..3f36d2d 100644
 --- a/net/minecraft/util/Timer.java
 +++ b/net/minecraft/util/Timer.java
-@@ -2,6 +2,8 @@ package net.minecraft.util;
+@@ -2,6 +2,7 @@ package net.minecraft.util;
  
  import net.minecraft.client.Minecraft;
  import net.minecraft.util.math.MathHelper;
 +import net.wurstclient.WurstClient;
-+import net.wurstclient.features.mods.TimerMod;
  
  public class Timer
  {
-@@ -65,6 +67,10 @@ public class Timer
+@@ -65,6 +66,9 @@ public class Timer
       */
      public void updateTimer()
      {
 +		// TODO: Client
-+		TimerMod timerMod = WurstClient.INSTANCE.mods.timerMod;
-+		timerSpeed = timerMod.isActive() ? timerMod.speed.getValueF() : 1F;
++		timerSpeed = WurstClient.INSTANCE.mods.timerMod.getTimerSpeed();
 +		
          long i = Minecraft.getSystemTime();
          long j = i - this.lastSyncSysClock;
