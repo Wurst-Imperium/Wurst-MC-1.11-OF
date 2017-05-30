@@ -1,6 +1,6 @@
-From 19c670f0033240ad4ebc789504e661c9fb38ce52 Mon Sep 17 00:00:00 2001
+From cecd81e11964d7de1cde9ace62c2237de310233e Mon Sep 17 00:00:00 2001
 From: Alexander01998 <contact.wurstimperium@gmail.com>
-Date: Tue, 30 May 2017 13:10:36 +0200
+Date: Tue, 30 May 2017 14:10:40 +0200
 Subject: [PATCH] mod
 
 ---
@@ -12,7 +12,7 @@ Subject: [PATCH] mod
  net/minecraft/block/BlockSoulSand.java             |   6 +
  net/minecraft/client/Minecraft.java                | 202 +++++++++---------
  net/minecraft/client/entity/EntityPlayerSP.java    | 103 ++++++---
- net/minecraft/client/gui/FontRenderer.java         |   2 +-
+ net/minecraft/client/gui/FontRenderer.java         |  17 +-
  net/minecraft/client/gui/GuiButton.java            |  19 +-
  net/minecraft/client/gui/GuiDisconnected.java      |  81 +++++++
  net/minecraft/client/gui/GuiGameOver.java          |  14 +-
@@ -62,7 +62,7 @@ Subject: [PATCH] mod
  net/minecraft/util/Timer.java                      |   4 +
  net/minecraft/world/World.java                     |  35 +--
  shadersmod/client/Shaders.java                     |  44 ++--
- 58 files changed, 1352 insertions(+), 668 deletions(-)
+ 58 files changed, 1363 insertions(+), 672 deletions(-)
 
 diff --git a/Start.java b/Start.java
 index ae0025f..9b0eed6 100644
@@ -903,10 +903,52 @@ index 0728387..46d9709 100644
  
      protected void updateAutoJump(float p_189810_1_, float p_189810_2_)
 diff --git a/net/minecraft/client/gui/FontRenderer.java b/net/minecraft/client/gui/FontRenderer.java
-index 9298070..6f70c5f 100644
+index 9298070..139c6ba 100644
 --- a/net/minecraft/client/gui/FontRenderer.java
 +++ b/net/minecraft/client/gui/FontRenderer.java
-@@ -908,7 +908,7 @@ public class FontRenderer implements IResourceManagerReloadListener
+@@ -1,8 +1,5 @@
+ package net.minecraft.client.gui;
+ 
+-import com.ibm.icu.text.ArabicShaping;
+-import com.ibm.icu.text.ArabicShapingException;
+-import com.ibm.icu.text.Bidi;
+ import java.awt.image.BufferedImage;
+ import java.io.Closeable;
+ import java.io.IOException;
+@@ -11,6 +8,13 @@ import java.util.List;
+ import java.util.Locale;
+ import java.util.Properties;
+ import java.util.Random;
++
++import org.apache.commons.io.IOUtils;
++
++import com.ibm.icu.text.ArabicShaping;
++import com.ibm.icu.text.ArabicShapingException;
++import com.ibm.icu.text.Bidi;
++
+ import net.minecraft.client.Minecraft;
+ import net.minecraft.client.renderer.GlStateManager;
+ import net.minecraft.client.renderer.Tessellator;
+@@ -26,7 +30,7 @@ import net.minecraft.src.Config;
+ import net.minecraft.src.CustomColors;
+ import net.minecraft.src.FontUtils;
+ import net.minecraft.util.ResourceLocation;
+-import org.apache.commons.io.IOUtils;
++import net.wurstclient.WurstClient;
+ 
+ public class FontRenderer implements IResourceManagerReloadListener
+ {
+@@ -397,6 +401,9 @@ public class FontRenderer implements IResourceManagerReloadListener
+      */
+     public int drawString(String text, float x, float y, int color, boolean dropShadow)
+     {
++		// TODO: Client
++		text = WurstClient.INSTANCE.mods.nameProtectMod.protect(text);
++		
+         this.enableAlpha();
+         this.resetStyles();
+         int i;
+@@ -908,7 +915,7 @@ public class FontRenderer implements IResourceManagerReloadListener
      /**
       * Inserts newline and formatting into a string to wrap it within the specified width.
       */
