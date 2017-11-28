@@ -1,6 +1,6 @@
-From 31ba879611150dd9bfced2735ab00d3e3e88eb17 Mon Sep 17 00:00:00 2001
+From e082f7601049891d915177b5a19501162fde04ad Mon Sep 17 00:00:00 2001
 From: Alexander01998 <contact.wurstimperium@gmail.com>
-Date: Mon, 31 Jul 2017 17:44:08 +0200
+Date: Tue, 28 Nov 2017 15:43:09 +0100
 Subject: [PATCH] mod
 
 ---
@@ -41,7 +41,7 @@ Subject: [PATCH] mod
  .../client/gui/inventory/GuiContainer.java         |  11 +-
  .../client/gui/inventory/GuiEditSign.java          |  19 +-
  .../client/multiplayer/GuiConnecting.java          |  14 +-
- .../client/multiplayer/PlayerControllerMP.java     |  34 +--
+ .../client/multiplayer/PlayerControllerMP.java     |  36 ++--
  net/minecraft/client/multiplayer/ServerList.java   |   6 +
  net/minecraft/client/multiplayer/WorldClient.java  |  11 +-
  .../client/network/NetHandlerPlayClient.java       | 191 ++++-------------
@@ -74,7 +74,7 @@ Subject: [PATCH] mod
  net/minecraft/world/World.java                     |  35 +--
  shadersmod/client/GuiSlotShaders.java              |   2 +-
  shadersmod/client/Shaders.java                     |  44 ++--
- 70 files changed, 1416 insertions(+), 695 deletions(-)
+ 70 files changed, 1417 insertions(+), 696 deletions(-)
 
 diff --git a/Start.java b/Start.java
 index ae0025f..9b0eed6 100644
@@ -2396,7 +2396,7 @@ index c1727b2..f5b4294 100644
                  }
                  catch (UnknownHostException unknownhostexception)
 diff --git a/net/minecraft/client/multiplayer/PlayerControllerMP.java b/net/minecraft/client/multiplayer/PlayerControllerMP.java
-index 82169d6..19a134f 100644
+index 82169d6..316cd73 100644
 --- a/net/minecraft/client/multiplayer/PlayerControllerMP.java
 +++ b/net/minecraft/client/multiplayer/PlayerControllerMP.java
 @@ -20,15 +20,7 @@ import net.minecraft.item.ItemBlock;
@@ -2433,6 +2433,15 @@ index 82169d6..19a134f 100644
  
      /**
       * Tick counter, when it hits 4 it resets back to 0 and plays the step sound
+@@ -65,7 +58,7 @@ public class PlayerControllerMP
+     private int blockHitDelay;
+ 
+     /** Tells if the player is hitting a block */
+-    private boolean isHittingBlock;
++    public boolean isHittingBlock;
+ 
+     /** Current game type for the player */
+     private GameType currentGameType = GameType.SURVIVAL;
 @@ -239,7 +232,10 @@ public class PlayerControllerMP
              {
                  this.connection.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.START_DESTROY_BLOCK, loc, face));
