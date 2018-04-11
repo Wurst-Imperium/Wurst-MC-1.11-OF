@@ -1,6 +1,6 @@
-From 493219d33225ab355b6fee2818402d6ec2a6fe53 Mon Sep 17 00:00:00 2001
+From 186bd928b9297fd4469fdd039aed7e6bc764e731 Mon Sep 17 00:00:00 2001
 From: Alexander01998 <contact.wurstimperium@gmail.com>
-Date: Thu, 8 Mar 2018 17:33:55 +0100
+Date: Wed, 11 Apr 2018 09:55:12 +0200
 Subject: [PATCH] mod
 
 ---
@@ -48,7 +48,7 @@ Subject: [PATCH] mod
  .../client/network/NetworkPlayerInfo.java          |   8 +
  .../client/renderer/BlockFluidRenderer.java        |   8 +
  .../client/renderer/BlockModelRenderer.java        |  25 ++-
- net/minecraft/client/renderer/EntityRenderer.java  | 130 ++++++++----
+ net/minecraft/client/renderer/EntityRenderer.java  | 131 ++++++++----
  .../client/renderer/InventoryEffectRenderer.java   |  22 +-
  net/minecraft/client/renderer/ItemRenderer.java    |  10 +
  net/minecraft/client/renderer/chunk/VisGraph.java  |   8 +
@@ -74,7 +74,7 @@ Subject: [PATCH] mod
  net/minecraft/world/World.java                     |  35 +--
  shadersmod/client/GuiSlotShaders.java              |   2 +-
  shadersmod/client/Shaders.java                     |  44 ++--
- 70 files changed, 1417 insertions(+), 696 deletions(-)
+ 70 files changed, 1418 insertions(+), 696 deletions(-)
 
 diff --git a/Start.java b/Start.java
 index ae0025f..9b0eed6 100644
@@ -2926,7 +2926,7 @@ index 80d9f25..61a76a0 100644
          }
  
 diff --git a/net/minecraft/client/renderer/EntityRenderer.java b/net/minecraft/client/renderer/EntityRenderer.java
-index b34a3af..253543d 100644
+index b34a3af..e1ea0dd 100644
 --- a/net/minecraft/client/renderer/EntityRenderer.java
 +++ b/net/minecraft/client/renderer/EntityRenderer.java
 @@ -1,8 +1,5 @@
@@ -2980,7 +2980,7 @@ index b34a3af..253543d 100644
  import net.minecraft.util.math.AxisAlignedBB;
  import net.minecraft.util.math.BlockPos;
  import net.minecraft.util.math.MathHelper;
-@@ -86,15 +91,9 @@ import net.minecraft.world.GameType;
+@@ -86,15 +91,10 @@ import net.minecraft.world.GameType;
  import net.minecraft.world.World;
  import net.minecraft.world.WorldProvider;
  import net.minecraft.world.biome.Biome;
@@ -2994,12 +2994,13 @@ index b34a3af..253543d 100644
 -import org.lwjgl.util.glu.GLU;
 -import org.lwjgl.util.glu.Project;
 +import net.wurstclient.WurstClient;
++import net.wurstclient.event.EventFactory;
 +import net.wurstclient.events.RenderListener.RenderEvent;
 +import net.wurstclient.hooks.ZoomHook;
  import shadersmod.client.Shaders;
  import shadersmod.client.ShadersRender;
  
-@@ -208,10 +207,10 @@ public class EntityRenderer implements IResourceManagerReloadListener
+@@ -208,10 +208,10 @@ public class EntityRenderer implements IResourceManagerReloadListener
      private int field_190567_ac;
      private float field_190568_ad;
      private float field_190569_ae;
@@ -3013,7 +3014,7 @@ index b34a3af..253543d 100644
      private boolean useShader;
      public int frameCount;
      private boolean initialized = false;
-@@ -307,7 +306,7 @@ public class EntityRenderer implements IResourceManagerReloadListener
+@@ -307,7 +307,7 @@ public class EntityRenderer implements IResourceManagerReloadListener
          }
      }
  
@@ -3022,7 +3023,7 @@ index b34a3af..253543d 100644
      {
          if (OpenGlHelper.isFramebufferEnabled())
          {
-@@ -604,6 +603,9 @@ public class EntityRenderer implements IResourceManagerReloadListener
+@@ -604,6 +604,9 @@ public class EntityRenderer implements IResourceManagerReloadListener
              {
                  f = this.mc.gameSettings.fovSetting;
  				
@@ -3032,7 +3033,7 @@ index b34a3af..253543d 100644
                  if (Config.isDynamicFov())
                  {
                      f *= this.fovModifierHandPrev + (this.fovModifierHand - this.fovModifierHandPrev) * partialTicks;
-@@ -660,6 +662,10 @@ public class EntityRenderer implements IResourceManagerReloadListener
+@@ -660,6 +663,10 @@ public class EntityRenderer implements IResourceManagerReloadListener
  
      private void hurtCameraEffect(float partialTicks)
      {
@@ -3043,7 +3044,7 @@ index b34a3af..253543d 100644
          if (this.mc.getRenderViewEntity() instanceof EntityLivingBase)
          {
              EntityLivingBase entitylivingbase = (EntityLivingBase)this.mc.getRenderViewEntity();
-@@ -772,8 +778,12 @@ public class EntityRenderer implements IResourceManagerReloadListener
+@@ -772,8 +779,12 @@ public class EntityRenderer implements IResourceManagerReloadListener
                      f5 = f5 * 0.1F;
                      RayTraceResult raytraceresult = this.mc.world.rayTraceBlocks(new Vec3d(d0 + (double)f3, d1 + (double)f4, d2 + (double)f5), new Vec3d(d0 - d4 + (double)f3 + (double)f5, d1 - d6 + (double)f4, d2 - d5 + (double)f5));
  					
@@ -3057,15 +3058,15 @@ index b34a3af..253543d 100644
                          double d7 = raytraceresult.hitVec.distanceTo(new Vec3d(d0, d1, d2));
  
                          if (d7 < d3)
-@@ -897,15 +907,20 @@ public class EntityRenderer implements IResourceManagerReloadListener
+@@ -897,15 +908,20 @@ public class EntityRenderer implements IResourceManagerReloadListener
  
          this.hurtCameraEffect(partialTicks);
- 
+ 		
 -        if (this.mc.gameSettings.viewBobbing)
 +		// TODO: Client
 +		if(this.mc.gameSettings.viewBobbing
-+			&& !WurstClient.INSTANCE.mods.tracersMod.isActive())
-         {
++			&& EventFactory.cameraTransformViewBobbing())
+ 		{
 +			
              this.setupViewBobbing(partialTicks);
          }
@@ -3080,7 +3081,7 @@ index b34a3af..253543d 100644
              int i = 20;
  
              if (this.mc.player.isPotionActive(MobEffects.NAUSEA))
-@@ -1525,7 +1540,12 @@ public class EntityRenderer implements IResourceManagerReloadListener
+@@ -1525,7 +1541,12 @@ public class EntityRenderer implements IResourceManagerReloadListener
              Shaders.beginRender(this.mc, partialTicks, finishTimeNano);
          }
  
@@ -3093,7 +3094,7 @@ index b34a3af..253543d 100644
          GlStateManager.enableAlpha();
          GlStateManager.alphaFunc(516, 0.1F);
          this.mc.mcProfiler.startSection("center");
-@@ -1888,12 +1908,21 @@ public class EntityRenderer implements IResourceManagerReloadListener
+@@ -1888,12 +1909,21 @@ public class EntityRenderer implements IResourceManagerReloadListener
  
          this.mc.mcProfiler.endStartSection("hand");
  		
@@ -3115,7 +3116,7 @@ index b34a3af..253543d 100644
              }
  
              GlStateManager.clear(256);
-@@ -2321,8 +2350,12 @@ public class EntityRenderer implements IResourceManagerReloadListener
+@@ -2321,8 +2351,12 @@ public class EntityRenderer implements IResourceManagerReloadListener
          this.fogColorBlue *= f13;
          double d1 = (entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * (double)partialTicks) * world.provider.getVoidFogYFactor();
  
@@ -3129,7 +3130,7 @@ index b34a3af..253543d 100644
              int i = ((EntityLivingBase)entity).getActivePotionEffect(MobEffects.BLINDNESS).getDuration();
  
              if (i < 20)
-@@ -2420,9 +2453,13 @@ public class EntityRenderer implements IResourceManagerReloadListener
+@@ -2420,9 +2454,13 @@ public class EntityRenderer implements IResourceManagerReloadListener
          if (f >= 0.0F)
          {
              GlStateManager.setFogDensity(f);
@@ -3145,7 +3146,7 @@ index b34a3af..253543d 100644
              float f2 = 5.0F;
              int i = ((EntityLivingBase)entity).getActivePotionEffect(MobEffects.BLINDNESS).getDuration();
  
-@@ -2482,8 +2519,12 @@ public class EntityRenderer implements IResourceManagerReloadListener
+@@ -2482,8 +2520,12 @@ public class EntityRenderer implements IResourceManagerReloadListener
  
              if (entity instanceof EntityLivingBase)
              {
@@ -3159,7 +3160,7 @@ index b34a3af..253543d 100644
                      GlStateManager.setFogDensity(0.01F);
                  }
                  else
-@@ -2503,17 +2544,23 @@ public class EntityRenderer implements IResourceManagerReloadListener
+@@ -2503,17 +2545,23 @@ public class EntityRenderer implements IResourceManagerReloadListener
          }
          else if (iblockstate.getMaterial() == Material.LAVA)
          {
@@ -3186,7 +3187,7 @@ index b34a3af..253543d 100644
          else
          {
              float f1 = this.farPlaneDistance;
-@@ -2922,7 +2969,18 @@ public class EntityRenderer implements IResourceManagerReloadListener
+@@ -2922,7 +2970,18 @@ public class EntityRenderer implements IResourceManagerReloadListener
          GlStateManager.glNormal3f(0.0F, 1.0F, 0.0F);
          GlStateManager.rotate(-viewerYaw, 0.0F, 1.0F, 0.0F);
          GlStateManager.rotate((float)(isThirdPersonFrontal ? -1 : 1) * viewerPitch, 1.0F, 0.0F, 0.0F);
