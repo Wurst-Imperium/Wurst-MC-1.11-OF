@@ -1,15 +1,16 @@
-From cbf158a8497475a31904667838175c0b68d843c0 Mon Sep 17 00:00:00 2001
+From a2aaf450cdd80197cbd3e1436d00368c6a31d440 Mon Sep 17 00:00:00 2001
 From: Alexander01998 <contact.wurstimperium@gmail.com>
-Date: Thu, 7 Jun 2018 00:10:16 +0200
+Date: Sun, 17 Jun 2018 09:42:41 +0200
 Subject: [PATCH] mod
 
 ---
  Start.java                                         |   2 +-
- net/minecraft/block/Block.java                     |  42 ++--
+ net/minecraft/block/Block.java                     |  34 +--
  net/minecraft/block/BlockCactus.java               |   7 +
- net/minecraft/block/BlockLiquid.java               |  15 +-
+ net/minecraft/block/BlockLiquid.java               |  11 +-
  net/minecraft/block/BlockSlab.java                 |   6 +-
  net/minecraft/block/BlockSoulSand.java             |   6 +
+ net/minecraft/block/state/BlockStateContainer.java |  31 ++-
  net/minecraft/client/Minecraft.java                | 196 +++++++++---------
  net/minecraft/client/entity/EntityPlayerSP.java    | 116 ++++++++---
  net/minecraft/client/gui/FontRenderer.java         |  17 +-
@@ -46,16 +47,17 @@ Subject: [PATCH] mod
  net/minecraft/client/multiplayer/WorldClient.java  |  11 +-
  .../client/network/NetHandlerPlayClient.java       | 191 ++++-------------
  .../client/network/NetworkPlayerInfo.java          |   8 +
- .../client/renderer/BlockFluidRenderer.java        |   8 +
+ .../client/renderer/BlockFluidRenderer.java        |   1 +
  .../client/renderer/BlockModelRenderer.java        |  25 ++-
  net/minecraft/client/renderer/EntityRenderer.java  | 131 ++++++++----
  .../client/renderer/InventoryEffectRenderer.java   |  22 +-
  net/minecraft/client/renderer/ItemRenderer.java    |  10 +
- net/minecraft/client/renderer/chunk/VisGraph.java  |   8 +
+ net/minecraft/client/renderer/chunk/VisGraph.java  |   6 +
  net/minecraft/client/renderer/entity/Render.java   |  24 +++
  .../client/renderer/entity/RenderLivingBase.java   |  16 +-
  .../client/renderer/entity/RenderManager.java      |   6 +-
  .../client/renderer/texture/TextureUtil.java       |   2 +-
+ .../tileentity/TileEntityRendererDispatcher.java   |  25 +--
  net/minecraft/client/resources/SkinManager.java    |  25 ++-
  net/minecraft/client/settings/GameSettings.java    |   2 +-
  net/minecraft/client/settings/KeyBinding.java      |   2 +-
@@ -74,7 +76,7 @@ Subject: [PATCH] mod
  net/minecraft/world/World.java                     |  35 ++--
  shadersmod/client/GuiSlotShaders.java              |   2 +-
  shadersmod/client/Shaders.java                     |  44 ++--
- 70 files changed, 1417 insertions(+), 698 deletions(-)
+ 72 files changed, 1422 insertions(+), 728 deletions(-)
 
 diff --git a/Start.java b/Start.java
 index ae0025f..9b0eed6 100644
@@ -90,7 +92,7 @@ index ae0025f..9b0eed6 100644
  
      public static <T> T[] concat(T[] first, T[] second)
 diff --git a/net/minecraft/block/Block.java b/net/minecraft/block/Block.java
-index 6d7a6ee..963909e 100644
+index 6d7a6ee..8dc842a 100644
 --- a/net/minecraft/block/Block.java
 +++ b/net/minecraft/block/Block.java
 @@ -1,11 +1,14 @@
@@ -127,41 +129,26 @@ index 6d7a6ee..963909e 100644
  import net.minecraft.util.math.AxisAlignedBB;
  import net.minecraft.util.math.BlockPos;
  import net.minecraft.util.math.MathHelper;
-@@ -47,6 +42,8 @@ import net.minecraft.util.text.translation.I18n;
+@@ -47,6 +42,7 @@ import net.minecraft.util.text.translation.I18n;
  import net.minecraft.world.Explosion;
  import net.minecraft.world.IBlockAccess;
  import net.minecraft.world.World;
 +import net.wurstclient.WurstClient;
-+import net.wurstclient.utils.XRayUtils;
  
  public class Block
  {
-@@ -378,7 +375,12 @@ public class Block
+@@ -378,7 +374,9 @@ public class Block
      @Deprecated
      public boolean isFullCube(IBlockState state)
-     {
+ 	{
 -        return true;
 +		// TODO: Client
-+		if(WurstClient.INSTANCE.mods.xRayMod.isActive())
-+			return XRayUtils.isXRayBlock(this);
-+		else
-+			return !WurstClient.INSTANCE.mods.freecamMod.isActive()
-+				&& !WurstClient.INSTANCE.mods.noClipMod.isActive();
++		return !WurstClient.INSTANCE.mods.freecamMod.isActive()
++			&& !WurstClient.INSTANCE.mods.noClipMod.isActive();
      }
  
      @Deprecated
-@@ -487,6 +489,10 @@ public class Block
-     @Deprecated
-     public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
-     {
-+		// TODO: Client
-+		if(WurstClient.INSTANCE.mods.xRayMod.isEnabled())
-+			return true;
-+		
-         AxisAlignedBB axisalignedbb = blockState.getBoundingBox(blockAccess, pos);
- 
-         switch (side)
-@@ -593,6 +599,10 @@ public class Block
+@@ -593,6 +591,10 @@ public class Block
  
      public boolean canCollideCheck(IBlockState state, boolean hitIfLiquid)
      {
@@ -172,7 +159,7 @@ index 6d7a6ee..963909e 100644
          return this.isCollidable();
      }
  
-@@ -685,7 +695,13 @@ public class Block
+@@ -685,7 +687,13 @@ public class Block
      public float getPlayerRelativeBlockHardness(IBlockState state, EntityPlayer player, World worldIn, BlockPos pos)
      {
          float f = state.getBlockHardness(worldIn, pos);
@@ -220,7 +207,7 @@ index f170b8b..5ea582d 100644
      }
  
 diff --git a/net/minecraft/block/BlockLiquid.java b/net/minecraft/block/BlockLiquid.java
-index 80533d7..83b8ee6 100644
+index 80533d7..33aa5b4 100644
 --- a/net/minecraft/block/BlockLiquid.java
 +++ b/net/minecraft/block/BlockLiquid.java
 @@ -1,7 +1,9 @@
@@ -241,7 +228,7 @@ index 80533d7..83b8ee6 100644
  
  public abstract class BlockLiquid extends Block
  {
-@@ -44,12 +47,16 @@ public abstract class BlockLiquid extends Block
+@@ -44,7 +47,9 @@ public abstract class BlockLiquid extends Block
      @Nullable
      public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, IBlockAccess worldIn, BlockPos pos)
      {
@@ -252,15 +239,7 @@ index 80533d7..83b8ee6 100644
      }
  
      public boolean isPassable(IBlockAccess worldIn, BlockPos pos)
-     {
--        return this.blockMaterial != Material.LAVA;
-+		// TODO: Client
-+		return WurstClient.INSTANCE.mods.xRayMod.isActive()
-+			|| this.blockMaterial != Material.LAVA;
-     }
- 
-     /**
-@@ -91,7 +98,9 @@ public abstract class BlockLiquid extends Block
+@@ -91,7 +96,9 @@ public abstract class BlockLiquid extends Block
  
      public boolean canCollideCheck(IBlockState state, boolean hitIfLiquid)
      {
@@ -333,6 +312,75 @@ index b48d9bd..88f7932 100644
          entityIn.motionX *= 0.4D;
          entityIn.motionZ *= 0.4D;
      }
+diff --git a/net/minecraft/block/state/BlockStateContainer.java b/net/minecraft/block/state/BlockStateContainer.java
+index b97ce59..5e8dec3 100644
+--- a/net/minecraft/block/state/BlockStateContainer.java
++++ b/net/minecraft/block/state/BlockStateContainer.java
+@@ -1,26 +1,19 @@
+ package net.minecraft.block.state;
+ 
+-import com.google.common.base.Function;
+-import com.google.common.base.Objects;
+-import com.google.common.base.Optional;
+-import com.google.common.collect.HashBasedTable;
+-import com.google.common.collect.ImmutableCollection;
+-import com.google.common.collect.ImmutableList;
+-import com.google.common.collect.ImmutableMap;
+-import com.google.common.collect.ImmutableSortedMap;
+-import com.google.common.collect.ImmutableTable;
+-import com.google.common.collect.Iterables;
+-import com.google.common.collect.Lists;
+-import com.google.common.collect.Maps;
+-import com.google.common.collect.Table;
+-import com.google.common.collect.UnmodifiableIterator;
+ import java.util.Collection;
+ import java.util.Collections;
+ import java.util.List;
+ import java.util.Map;
+ import java.util.Map.Entry;
+ import java.util.regex.Pattern;
++
+ import javax.annotation.Nullable;
++
++import com.google.common.base.Function;
++import com.google.common.base.Objects;
++import com.google.common.base.Optional;
++import com.google.common.collect.*;
++
+ import net.minecraft.block.Block;
+ import net.minecraft.block.BlockFlower;
+ import net.minecraft.block.material.EnumPushReaction;
+@@ -44,6 +37,7 @@ import net.minecraft.util.math.Vec3d;
+ import net.minecraft.world.IBlockAccess;
+ import net.minecraft.world.World;
+ import net.minecraftforge.common.property.IUnlistedProperty;
++import net.wurstclient.event.EventFactory;
+ 
+ public class BlockStateContainer
+ {
+@@ -413,7 +407,9 @@ public class BlockStateContainer
+ 
+         public float getAmbientOcclusionLightValue()
+         {
+-            return this.block.getAmbientOcclusionLightValue(this);
++			// TODO: Client
++			return EventFactory.getAmbientOcclusionLightValue(
++				this.block.getAmbientOcclusionLightValue(this), this);
+         }
+ 
+         public boolean isBlockNormalCube()
+@@ -478,7 +474,10 @@ public class BlockStateContainer
+ 
+         public boolean shouldSideBeRendered(IBlockAccess blockAccess, BlockPos pos, EnumFacing facing)
+         {
+-            return this.block.shouldSideBeRendered(this, blockAccess, pos, facing);
++			// TODO: Client
++			return EventFactory.shouldSideBeRendered(
++				this.block.shouldSideBeRendered(this, blockAccess, pos, facing),
++				this);
+         }
+ 
+         public boolean isOpaqueCube()
 diff --git a/net/minecraft/client/Minecraft.java b/net/minecraft/client/Minecraft.java
 index 20bd020..24e3bfe 100644
 --- a/net/minecraft/client/Minecraft.java
@@ -2861,33 +2909,19 @@ index 3d77aef..f9c1eae 100644
       * Returns the GameProfile for the player represented by this NetworkPlayerInfo instance
       */
 diff --git a/net/minecraft/client/renderer/BlockFluidRenderer.java b/net/minecraft/client/renderer/BlockFluidRenderer.java
-index 7018471..54452a7 100644
+index 7018471..90742aa 100644
 --- a/net/minecraft/client/renderer/BlockFluidRenderer.java
 +++ b/net/minecraft/client/renderer/BlockFluidRenderer.java
-@@ -17,6 +17,8 @@ import net.minecraft.util.EnumFacing;
- import net.minecraft.util.math.BlockPos;
- import net.minecraft.util.math.MathHelper;
- import net.minecraft.world.IBlockAccess;
-+import net.wurstclient.WurstClient;
-+import net.wurstclient.utils.XRayUtils;
- import shadersmod.client.SVertexBuilder;
- 
- public class BlockFluidRenderer
-@@ -54,6 +56,12 @@ public class BlockFluidRenderer
+@@ -54,6 +54,7 @@ public class BlockFluidRenderer
              }
  
              BlockLiquid blockliquid = (BlockLiquid)blockStateIn.getBlock();
-+
-+    		// TODO: Client
-+    		if(WurstClient.INSTANCE.mods.xRayMod.isActive()
-+    			&& !XRayUtils.isXRayBlock(blockliquid))
-+    			return false;
 +    		
              boolean flag = blockStateIn.getMaterial() == Material.LAVA;
              TextureAtlasSprite[] atextureatlassprite = flag ? this.atlasSpritesLava : this.atlasSpritesWater;
              RenderEnv renderenv = worldRendererIn.getRenderEnv(blockAccess, blockStateIn, blockPosIn);
 diff --git a/net/minecraft/client/renderer/BlockModelRenderer.java b/net/minecraft/client/renderer/BlockModelRenderer.java
-index 80d9f25..61a76a0 100644
+index 80d9f25..70c6809 100644
 --- a/net/minecraft/client/renderer/BlockModelRenderer.java
 +++ b/net/minecraft/client/renderer/BlockModelRenderer.java
 @@ -2,7 +2,9 @@ package net.minecraft.client.renderer;
@@ -2905,35 +2939,41 @@ index 80d9f25..61a76a0 100644
  import net.minecraft.util.math.Vec3i;
  import net.minecraft.world.IBlockAccess;
 +import net.wurstclient.WurstClient;
-+import net.wurstclient.utils.XRayUtils;
++import net.wurstclient.event.EventFactory;
  import shadersmod.client.SVertexBuilder;
  
  public class BlockModelRenderer
-@@ -49,6 +53,11 @@ public class BlockModelRenderer
+@@ -96,6 +100,10 @@ public class BlockModelRenderer
  
-     public boolean renderModel(IBlockAccess blockAccessIn, IBakedModel modelIn, IBlockState blockStateIn, BlockPos blockPosIn, VertexBuffer buffer, boolean checkSides)
-     {
+     public boolean renderModelSmooth(IBlockAccess worldIn, IBakedModel modelIn, IBlockState stateIn, BlockPos posIn, VertexBuffer buffer, boolean checkSides, long rand)
+ 	{
 +		// TODO: Client
-+		if(WurstClient.INSTANCE.mods.xRayMod.isActive()
-+			&& !XRayUtils.isXRayBlock(blockStateIn.getBlock()))
++		if(!EventFactory.renderBlockModel(stateIn))
 +			return false;
 +		
-         return this.renderModel(blockAccessIn, modelIn, blockStateIn, blockPosIn, buffer, checkSides, MathHelper.getPositionRandom(blockPosIn));
-     }
+         boolean flag = false;
+         RenderEnv renderenv = buffer.getRenderEnv(worldIn, stateIn, posIn);
  
-@@ -113,8 +122,11 @@ public class BlockModelRenderer
+@@ -113,7 +121,7 @@ public class BlockModelRenderer
  
          List<BakedQuad> list1 = modelIn.getQuads(stateIn, (EnumFacing)null, rand);
          
 -        if (!list1.isEmpty())
-+		// TODO: Client
-+		if(!list1.isEmpty() && (!WurstClient.INSTANCE.mods.xRayMod.isActive()
-+			|| XRayUtils.isXRayBlock(stateIn.getBlock())))
++		if(!list1.isEmpty())
  		{
-+        	
              list1 = BlockModelCustomizer.getRenderQuads(list1, worldIn, stateIn, posIn, (EnumFacing)null, rand, renderenv);
              this.renderQuadsSmooth(worldIn, stateIn, posIn, buffer, list1, renderenv);
-             flag = true;
+@@ -125,6 +133,10 @@ public class BlockModelRenderer
+ 
+     public boolean renderModelFlat(IBlockAccess worldIn, IBakedModel modelIn, IBlockState stateIn, BlockPos posIn, VertexBuffer buffer, boolean checkSides, long rand)
+ 	{
++		// TODO: Client
++		if(!EventFactory.renderBlockModel(stateIn))
++			return false;
++		
+         boolean flag = false;
+         RenderEnv renderenv = buffer.getRenderEnv(worldIn, stateIn, posIn);
+ 
 @@ -704,6 +716,17 @@ public class BlockModelRenderer
                  br3 = br4;
              }
@@ -3322,7 +3362,7 @@ index e045d49..599dad6 100644
          VertexBuffer vertexbuffer = tessellator.getBuffer();
          GlStateManager.color(1.0F, 1.0F, 1.0F, 0.9F);
 diff --git a/net/minecraft/client/renderer/chunk/VisGraph.java b/net/minecraft/client/renderer/chunk/VisGraph.java
-index cdc2912..9bdcf0d 100644
+index cdc2912..334a63b 100644
 --- a/net/minecraft/client/renderer/chunk/VisGraph.java
 +++ b/net/minecraft/client/renderer/chunk/VisGraph.java
 @@ -4,9 +4,11 @@ import java.util.ArrayDeque;
@@ -3333,20 +3373,18 @@ index cdc2912..9bdcf0d 100644
  import net.minecraft.util.EnumFacing;
  import net.minecraft.util.IntegerCache;
  import net.minecraft.util.math.BlockPos;
-+import net.wurstclient.WurstClient;
++import net.wurstclient.event.EventFactory;
  
  public class VisGraph
  {
-@@ -19,6 +21,12 @@ public class VisGraph
+@@ -19,6 +21,10 @@ public class VisGraph
  
      public void setOpaqueCube(BlockPos pos)
-     {
+ 	{
 +		// TODO: Client
-+		if(WurstClient.INSTANCE.mods.xRayMod.isActive()
-+			|| WurstClient.INSTANCE.mods.freecamMod.isActive()
-+			|| WurstClient.INSTANCE.mods.caveFinderMod.isActive())
++		if(!EventFactory.setOpaqueCube())
 +			return;
-+    	
++		
          this.bitSet.set(getIndex(pos), true);
          --this.empty;
      }
@@ -3478,6 +3516,61 @@ index 9a4a241..6b53293 100644
      {
          GlStateManager.bindTexture(p_94277_0_);
      }
+diff --git a/net/minecraft/client/renderer/tileentity/TileEntityRendererDispatcher.java b/net/minecraft/client/renderer/tileentity/TileEntityRendererDispatcher.java
+index 429d1fb..b770d25 100644
+--- a/net/minecraft/client/renderer/tileentity/TileEntityRendererDispatcher.java
++++ b/net/minecraft/client/renderer/tileentity/TileEntityRendererDispatcher.java
+@@ -1,8 +1,11 @@
+ package net.minecraft.client.renderer.tileentity;
+ 
+-import com.google.common.collect.Maps;
+ import java.util.Map;
++
+ import javax.annotation.Nullable;
++
++import com.google.common.collect.Maps;
++
+ import net.minecraft.client.Minecraft;
+ import net.minecraft.client.gui.FontRenderer;
+ import net.minecraft.client.model.ModelShulker;
+@@ -17,24 +20,12 @@ import net.minecraft.crash.CrashReport;
+ import net.minecraft.crash.CrashReportCategory;
+ import net.minecraft.entity.Entity;
+ import net.minecraft.src.Reflector;
+-import net.minecraft.tileentity.TileEntity;
+-import net.minecraft.tileentity.TileEntityBanner;
+-import net.minecraft.tileentity.TileEntityBeacon;
+-import net.minecraft.tileentity.TileEntityChest;
+-import net.minecraft.tileentity.TileEntityEnchantmentTable;
+-import net.minecraft.tileentity.TileEntityEndGateway;
+-import net.minecraft.tileentity.TileEntityEndPortal;
+-import net.minecraft.tileentity.TileEntityEnderChest;
+-import net.minecraft.tileentity.TileEntityMobSpawner;
+-import net.minecraft.tileentity.TileEntityPiston;
+-import net.minecraft.tileentity.TileEntityShulkerBox;
+-import net.minecraft.tileentity.TileEntitySign;
+-import net.minecraft.tileentity.TileEntitySkull;
+-import net.minecraft.tileentity.TileEntityStructure;
++import net.minecraft.tileentity.*;
+ import net.minecraft.util.ReportedException;
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.util.math.RayTraceResult;
+ import net.minecraft.world.World;
++import net.wurstclient.event.EventFactory;
+ 
+ public class TileEntityRendererDispatcher
+ {
+@@ -124,6 +115,10 @@ public class TileEntityRendererDispatcher
+ 
+     public void renderTileEntity(TileEntity tileentityIn, float partialTicks, int destroyStage)
+ 	{
++		// TODO: Client
++		if(!EventFactory.renderTileEntity(tileentityIn))
++			return;
++		
+         if (tileentityIn.getDistanceSq(this.entityX, this.entityY, this.entityZ) < tileentityIn.getMaxRenderDistanceSquared())
+         {
+             RenderHelper.enableStandardItemLighting();
 diff --git a/net/minecraft/client/resources/SkinManager.java b/net/minecraft/client/resources/SkinManager.java
 index 5826984..2a01cd2 100644
 --- a/net/minecraft/client/resources/SkinManager.java
